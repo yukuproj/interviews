@@ -160,50 +160,51 @@ def isNaN(num):
  
 def calculate_fpr_tpr_gini_no_lib(y_true, y_scores):
     """
-    Вычисление Gini индекса, FPR и TPR с линейной сложностью на основе правильно упорядоченных пар.
+    Calculate Gini index, FPR (False Positive Rate), and TPR (True Positive Rate) with linear complexity
+    based on correctly ordered pairs.
     
-    :param y_true: Список истинных меток классов (0 или 1).
-    :param y_scores: Список предсказанных вероятностей для положительного класса.
-    :return: Gini индекс, списки FPR и TPR.
+    :param y_true: List of true class labels (0 or 1).
+    :param y_scores: List of predicted probabilities for the positive class.
+    :return: Gini index, lists of FPR and TPR.
     """
     
-    # Сортировка данных по предсказанным вероятностям (по убыванию)
+    # Combine true labels and predicted scores, then sort by predicted scores in descending order
     combined = list(zip(y_true, y_scores))
     combined.sort(key=lambda x: x[1], reverse=True)
     
-    # Подсчет количества положительных и отрицательных классов
+    # Count the total number of positive and negative classes
     total_positives = sum(y_true)
     total_negatives = len(y_true) - total_positives
     
-    # Переменные для подсчета
+    # Initialize variables for cumulative sums and correct pair counting
     cumulative_positives = 0
     cumulative_negatives = 0
     correct_pairs = 0
     
-    # Списки для FPR и TPR
+    # Initialize lists to store FPR and TPR values
     fpr_list = []
     tpr_list = []
     
-    # Проход по отсортированным данным
+    # Loop through sorted data
     for label, score in combined:
         if label == 1:
             cumulative_positives += 1
         else:
             cumulative_negatives += 1
-            # Для каждого отрицательного примера добавляем столько правильных пар, сколько было положительных до него
+            # For each negative example, add correct pairs as the number of positives seen before it
             correct_pairs += cumulative_positives
         
-        # Вычисляем текущие значения TPR и FPR
+        # Calculate current TPR and FPR
         tpr = cumulative_positives / total_positives if total_positives != 0 else 0
         fpr = cumulative_negatives / total_negatives if total_negatives != 0 else 0
         
         tpr_list.append(tpr)
         fpr_list.append(fpr)
     
-    # Общее количество пар (P * N)
+    # Total number of pairs (P * N)
     total_pairs = total_positives * total_negatives
     
-    # Gini индекс
+    # Calculate Gini index
     gini = (2 * correct_pairs) / total_pairs - 1 if total_pairs != 0 else 0
          
     return fpr_list, tpr_list, gini
